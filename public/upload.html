@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<head>
+    <title>
+        תקצירון
+    </title>
+    <link rel="stylesheet" href="/static/styles/upload.css">   
+</head>
+<body>
+    <div id="container">
+        <h1>העלאת קבצים</h1>
+
+        <iframe name="dummyframe" id="dummyframe" style="display: none"></iframe>
+        <form id="uform" action="/upload" method="post" enctype="multipart/form-data" target="dummyframe">
+            <label class="fileStyle" for="fileUpload">
+                <div class="textContainer">
+                    <span id="inputStat" class="centerText">
+                        לחץ כאן כדי לבחור קובץ
+                    </span>
+                </div>
+                <img src="/static/assets/upload.svg" class="icon2">
+                <input id="fileUpload" type="file" name="file">
+            </label>
+            <input type="text" name="summeryName" placeholder="שם קובץ">
+            <input id="author" type="text" name="author" placeholder="שם מחבר">
+            <input id="description" type="text" name="description" placeholder="תאור(לא חובה)">
+            <div class="select">
+                <select name="subject">
+                    <option value="">בחר מקצוע:</option>
+                    <option value="math">מתמטיקה</option>
+                    <option value="lashon">לשון</option>
+                    <option value="english">אנגלית</option>
+                    <option value="history">היסטוריה</option>
+                </select>
+                <div class="arrow">
+                    <img src="/static/assets/caret-down-fill.svg" class="icon">
+                </div>
+            </div>
+            <input id="fsubmit" type="submit" value="שלח">
+          </form>
+          <script>
+            var inputstat = document.getElementById("inputStat");
+             document.getElementById('fileUpload').addEventListener('change', function(e) {
+                if (e.target.files[0]) {
+                    inputstat.innerText = "נבחר הקובץ: " + e.target.files[0].name;
+                }
+            });
+            var uform = document.getElementById("uform");
+            var fsubmit = document.getElementById("fsubmit");
+            fsubmit.addEventListener("click",function(){
+                uform.submit();
+                fsubmit.disabled = true;
+                fsubmit.value="נשלח!";
+                fsubmit.classList.add("disbttn");
+            })
+          </script>
+    </div>
+</body>

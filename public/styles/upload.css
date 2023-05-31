@@ -1,0 +1,129 @@
+html,body{
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    direction: rtl;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url("/static/assets/background.webp");
+}
+
+#fsubmit {
+    background-color: white !important;
+    transition: 250ms;
+}
+
+#fsubmit:hover {
+    background-color: darkgray !important;
+    transition: 200ms;
+}
+#container {
+    text-align: center;
+    display: block;
+    background-color: rgb(255, 255, 255);
+    border: 2px solid black;
+    width: 40%;
+    height: 50%;
+    margin: auto;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.disbttn {
+    color: red;
+}
+
+form>*{
+    margin-top: 10px;
+    margin-bottom: 0;
+    box-sizing: border-box;
+    width: 50%;
+    height: 30px;
+    border: 1px solid black;
+    font-size: 1em;
+    background-color: white;
+    padding-right: 0.5rem;
+
+}
+.arrow {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    color: black;
+    width: 10%;
+    height: 100%;
+    line-height: 100%;
+    border-right: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    pointer-events: none;
+}
+.icon {
+    margin: 25%;
+    width: 50%;
+}
+.select {
+    position: relative;
+    padding: 0;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+:root {
+    --select-border: #777;
+    --select-focus: blue;
+    --select-arrow: var(--select-border);
+}
+select {
+    height: 100%;
+    width: 100%;
+    padding: 5px;
+    appearance: none;
+    background-color: white;
+    border: none;
+    outline: none;
+    color: gray;
+    font-size: 1em;
+}
+
+select::-ms-expand {
+    display: none;
+}
+
+.textContainer {
+    display: table;
+    text-align: start;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+
+}
+
+.fileStyle {
+    padding-left: 0.5rem;
+    display: flex;
+    justify-content: space-evenly;
+    background-color: white !important;
+    transition: 250ms;
+}
+
+.fileStyle:hover {
+    background-color: darkgrey !important;
+    transition: 250ms;
+}
+
+.centerText {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#fileUpload {
+    display: none;
+}
