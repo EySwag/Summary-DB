@@ -78,7 +78,7 @@ function createItemPending(title,description,path,id){
     h2.innerText = title;
     span.innerText = description;
     download.setAttribute("type", "submit");
-    download.setAttribute("onclick", "window.open(\'" + "/files/" + path + "\');")
+    download.setAttribute("onclick", "window.open(\'" + "/pending/" + path + "?pass=" + AdminPass +"\');")
     var confirm = document.createElement("button");
     confirm.innerText = "✓";
     confirm.setAttribute("class", "confirm");
@@ -149,12 +149,12 @@ function updateList(){
     clear();
     get("/pending",function(){
         files.forEach(element => {
-            createItemPending(element.summeryName,element.description,element.pathnamem,element.id)
+            createItemPending(element.summery_name,element.description,element.path_name,element.id)
         });
     })
     get("/files",function(){
         files.forEach(element => {
-            createItem(element.summeryName,element.description,element.pathnamem,element.id)
+            createItem(element.summery_name,element.description,element.path_name,element.id)
         });
     })
 }

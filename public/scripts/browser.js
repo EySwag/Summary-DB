@@ -34,6 +34,6 @@ function get(url,callback){
 }
 get("/files",function(){
     files.forEach(element => {
-        createItem(element.summeryName,element.description,element.pathname)
+        createItem(element.summery_name,element.description,element.path_name)
     });
 })

@@ -5,74 +5,66 @@ const path = require('path')
 const multer  = require('multer')
 const fs = require('fs');
 const { formatWithOptions } = require('util')
+const sqlite3 = require('sqlite3').verbose();
 var crypto = require('crypto')
 
-var pendingDB = JSON.parse(fs.readFileSync('pending.json','utf-8'));
-var filesDB = JSON.parse(fs.readFileSync('files.json','utf-8'));
+function errorFunction(err){
+  if(err) return console.error(err.message);
+}
+
+const db = new sqlite3.Database('./files.db',sqlite3.OPEN_READWRITE,errorFunction)
+
+//Create files table
+//db.run("CREATE TABLE files(id INTEGER PRIMARY KEY,summery_name,path_name,original_name,author,description,subject)")
+//Create pending table
+//db.run("CREATE TABLE pending(id INTEGER PRIMARY KEY,summery_name,path_name,original_name,author,description,subject)")
+
+
 
 function addPendingFile(originalname,pathname,summeryName,author,description,subject){
-  pendingDB.push({
-    "summeryName": summeryName,
-    "pathname": pathname,
-    "originalname": originalname,
-    "author": author,
-    "description": description,
-    "subject": subject,
-    "id": crypto.randomBytes(10).toString('hex')
-  })
-  fs.writeFileSync("pending.json",JSON.stringify(pendingDB,null,"\t"));
+  var sql = "INSERT INTO pending(summery_name,path_name,original_name,author,description,subject) VALUES (?,?,?,?,?,?)";
+  db.run(sql,[summeryName,pathname,originalname,author,description,subject],errorFunction);
 }
 function removePendingFile(id){
+  var sql = "SELECT path_name FROM pending WHERE id=?";
 
-  for(var i = 0; i < pendingDB.length;i++){
-    if(id == pendingDB[i].id){
-      fs.unlinkSync(path.join(__dirname,"/pending",pendingDB[i].pathname));
-      pendingDB.splice(i,1);
-      fs.writeFileSync("pending.json",JSON.stringify(pendingDB,null,"\t"));
-      return;
-    }
-  }
+  db.get(sql,[id],(err,row)=>{
+    if(err) return console.error(err.message);
+
+    fs.unlinkSync(path.join(__dirname,"/pending",row.path_name));
+  })
+    
+
 }
 function addFile(originalname,pathname,summeryName,author,description,subject){
-  filesDB.push({
-    "summeryName": summeryName,
-    "pathname": pathname,
-    "originalname": originalname,
-    "author": author,
-    "description": description,
-    "subject": subject,
-    "id": crypto.randomBytes(10).toString('hex')
-  })
-  fs.writeFileSync("files.json",JSON.stringify(filesDB,null,"\t"));
+  var sql = "INSERT INTO files(summery_name,path_name,original_name,author,description,subject) VALUES (?,?,?,?,?,?)";
+  db.run(sql,[summeryName,pathname,originalname,author,description,subject],errorFunction);
 }
 function confirmFile(id){
-  var index = -1;
-  for(var i = 0; i < pendingDB.length;i++){
-    if(pendingDB[i].id == id){
-      index = i;
-    }
-  }
-  if(index == -1){
-    return;
-  }
-  addFile(pendingDB[index].originalname,pendingDB[index].pathname,pendingDB[index].summeryName,pendingDB[index].author,pendingDB[index].description,pendingDB[index].subject);
+  
+  var sql = "SELECT * FROM pending WHERE id=?"
+  db.get(sql,[id],(err,row)=>{
+    if(err) return console.error(err.message);
+    var oldPath = path.join(__dirname,"/pending",row.path_name)
+    var newPath = path.join(__dirname,"/files",row.path_name)
+    fs.renameSync(oldPath, newPath)
+    var sql2 = "INSERT INTO files(summery_name,path_name,original_name,author,description,subject) VALUES (?,?,?,?,?,?)"
+    db.run(sql2,[row.summery_name,row.path_name,row.original_name,row.author,row.description,row.subject],errorFunction);
+  })
+  sql = "DELETE FROM pending WHERE id=?";
+  db.run(sql,[id],errorFunction);
+  
 
-  var oldPath = path.join(__dirname,"/pending",pendingDB[index].pathname)
-  var newPath = path.join(__dirname,"/files",pendingDB[index].pathname)
-
-  fs.renameSync(oldPath, newPath)
-  pendingDB.splice(index,1);
-  fs.writeFileSync("pending.json",JSON.stringify(pendingDB,null,"\t"));
 }
 function removeFile(id){
-  for(var i = 0; i < filesDB.length;i++){
-    if(id == filesDB[i].id){
-      fs.unlinkSync(path.join(__dirname,"/files",filesDB[i].pathname));
-      filesDB.splice(i,1);
-      fs.writeFileSync("files.json",JSON.stringify(filesDB,null,"\t"));
-      return;
-    }
-  }
+  var sql = "SELECT * FROM files WHERE id=?"
+  db.get(sql,function(err,row){
+    if(err) return console.error(err.message);
+
+    fs.unlinkSync(path.join(__dirname,"/files",row.path_name));
+  })
+  sql = "DELETE FROM files WHERE id=?";
+  db.run(sql,[id],errorFunction);
 }
 
 let password = fs.readFileSync('password.txt', 'utf8');
@@ -134,19 +126,23 @@ app.post('/upload',upload.single('file'),function(req,res){
     if(exists){fs.unlinkSync(path.join(__dirname,"/pending",req.file.filename))}
     res.send('missing fields');
   }else{
-    var isDupe = false;
-    pendingDB.forEach(element => {
-      if(element.summeryName == req.body.summeryName && element.subject == req.body.subject){
-        isDupe = true;
+    
+    var sql = "SELECT * FROM pending"
+    db.all(sql,function(err,rows){
+      var isDupe = false;
+      rows.forEach(element => {
+        if(element.summery_name == req.body.summeryName && element.subject == req.body.subject){
+          isDupe = true;
+        }
+      });
+      if(isDupe){
+        fs.unlinkSync(path.join(__dirname,"/pending",req.file.filename));
+        res.send('duplicate');
+      }else{
+        addPendingFile(req.file.originalname,req.file.filename,req.body.summeryName,req.body.author,req.body.description,req.body.subject);
+        res.send('upload successful');
       }
-    });
-    if(isDupe){
-      fs.unlinkSync(path.join(__dirname,"/pending",req.file.filename));
-      res.send('duplicate');
-    }else{
-      addPendingFile(req.file.originalname,req.file.filename,req.body.summeryName,req.body.author,req.body.description,req.body.subject);
-      res.send('upload successful');
-    }
+    })
   }
 })
 app.post("/confirm",function(req,res){
@@ -187,11 +183,31 @@ app.post("/validate",function(req,res){
 })
 
 app.get("/files",function(req,res){
-  res.json(filesDB);
+  var sql = "SELECT * FROM files"
+  db.all(sql,function(err,rows){
+    res.json(rows);
+  })
 })
 app.get("/pending",function(req,res){
   if(req.headers.password == password){
-    res.json(pendingDB);
+    var sql = "SELECT * FROM pending"
+    db.all(sql,function(err,rows){
+      res.json(rows);
+    })
+    return;
+  }
+  res.status(403)
+  res.send("insufficient permissions");
+})
+
+app.get("/pending/:filename",function(req,res){
+  if(req.query.pass == password){
+    if(fs.existsSync(path.join(__dirname,"/pending",req.params.filename))){
+      res.sendFile(path.join(__dirname,"/pending",req.params.filename));
+      return;
+    }
+    res.status(404)
+    res.send("file not found");
     return;
   }
   res.status(403)
