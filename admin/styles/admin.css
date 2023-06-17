@@ -1,4 +1,44 @@
+/* width */
+::-webkit-scrollbar {
+    width: 0.7rem;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-right: 2px solid black;
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #888; 
+    border-right: 2px solid black;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+  }
+.filterContainer {
+    max-height: 15rem;
+    overflow-x: hidden;
+    overflow-y:auto;
+    border-bottom: 2px solid black;
+}
 
+.filterContainer div:last-child{
+    border-bottom: none;
+}
+
+.selected {
+    background-color: rgb(0, 255, 0);
+}
+.selected:hover {
+    background-color: rgb(0, 200, 0) !important;
+}
+.selected:hover a {
+    color:black;
+}
 
 /* Style the header with a grey background and some padding */
 .header {
@@ -49,7 +89,21 @@ html,body {
     background-color: rgb(255, 0, 0) !important;
     background-image: none !important;
 }
+.ItemText {
+    height: 100%;
+    padding-top: 1rem;
+    padding-right: 1rem;
+    flex: 3;
+    
+}
+.ButtonCon {
+    height: 100%;
+    flex: 1;
+}
+.ButtonCon button {
+    float: left;
 
+}
 .file {
     width: 100%;
     text-align: center;
@@ -63,13 +117,9 @@ html,body {
     position: relative;
 }
 .file h2 {
-    display: flex;
     margin: 0;
-    width: 10%;
 }
 .file span {
-    display: flex;
-    width: 10%;
     margin: 0;
 }
 .file button {
@@ -128,7 +178,7 @@ html,body {
 
 .vertical-menu a {
   background-color: transparent;
-  color: black;
+  color: rgb(97, 97, 97);
   display: block;
   padding: 0;
   text-decoration: none;
@@ -139,7 +189,7 @@ html,body {
 }
 .item {
     width: 100%;
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid gray;
     padding: 5px;
     user-select: none;
 }

@@ -38,7 +38,9 @@ function init(){
     }
 }
 init();
-
+function gradeToGrade(grade) {
+    return ["ז","ח","ט","י","יא","יב","בגרות"][grade];
+}
 var container = document.getElementById("Container")
 function confirm(id){
     var xmlHttpRequest = new XMLHttpRequest();  
@@ -67,7 +69,7 @@ function remove(id){
     updateList();
 }
 
-function createItemPending(title,description,path,id){
+function createItemPending(title,description,path,id,author,grade,subject){
     var div = document.createElement('div');
     div.setAttribute("class","file");
     var div2 = document.createElement('div');
@@ -76,7 +78,7 @@ function createItemPending(title,description,path,id){
     var span = document.createElement("span");
     var download = document.createElement("button");
     h2.innerText = title;
-    span.innerText = description;
+    span.innerText = "מאת: "+ author + "," + " שכבה: " + gradeToGrade(grade) +", מקצוע: "+ translateSubject(subject) +"\n" + description;
     download.setAttribute("type", "submit");
     download.setAttribute("onclick", "window.open(\'" + "/pending/" + path + "?pass=" + AdminPass +"\');")
     var confirm = document.createElement("button");
@@ -94,11 +96,11 @@ function createItemPending(title,description,path,id){
     div3.appendChild(confirm);
     div.appendChild(div2);
     div.appendChild(div3);
-    div2.setAttribute("style","height:100%;")
-    div3.setAttribute("style","height:100%;")
+    div2.setAttribute("class","ItemText")
+    div3.setAttribute("class","ButtonCon")
     container.appendChild(div);
 }
-function createItem(title,description,path,id){
+function createItem(title,description,path,id,author,grade,subject){
     var div = document.createElement('div');
     div.setAttribute("class","file");
     var div2 = document.createElement('div');
@@ -107,7 +109,7 @@ function createItem(title,description,path,id){
     var span = document.createElement("span");
     var download = document.createElement("button");
     h2.innerText = title;
-    span.innerText = description;
+    span.innerText = "מאת: "+ author + "," + " שכבה: " + gradeToGrade(grade) +", מקצוע: "+ translateSubject(subject) +"\n" + description;
     download.setAttribute("type", "submit");
     download.setAttribute("onclick", "window.open(\'" + "/files/" + path + "\');")
     var remove = document.createElement("button");
@@ -120,14 +122,77 @@ function createItem(title,description,path,id){
     div3.appendChild(remove);
     div.appendChild(div2);
     div.appendChild(div3);
-    div2.setAttribute("style","height:100%;")
-    div3.setAttribute("style","height:100%;")
+    div2.setAttribute("class","ItemText");
+    div3.setAttribute("class","ButtonCon");
     container.appendChild(div);
 }
-
+function translateSubject(english){
+    var translations = {
+        "lashon":"לשון",
+        "math":"מתמטיקה",
+        "english":"אנגלית",
+        "history":"היסטוריה",
+        "literature":"ספרות",
+        "tanakh":"תנ\"ך",
+        "citizenship":"אזרחות",
+        "geography":"גאוגרפיה",
+        "chemistry":"כימיה",
+        "biology":"ביולוגיה",
+        "physics":"פיזיקה",
+        "software_engineering":"הנדסת תוכנה",
+        "computer_science":"מדעי המחשב",
+        "art":"אומנות",
+        "humanistics":"הומניסטיקה"
+    }
+    return translations[english];
+}
+function itemsWithFilters(gradeFilters,subjectFilters,nameFilter){
+    clear();
+    var isPending = gradeFilters.includes("pending");
+    var index = gradeFilters.indexOf("pending");
+    if (index !== -1) {
+        gradeFilters.splice(index, 1);
+    }
+    pending.forEach(element => {
+        if((gradeFilters.includes(element.grade) || gradeFilters.length == 0) && (subjectFilters.includes(element.subject)|| subjectFilters.length == 0) && (element.summery_name.includes(nameFilter)|| nameFilter == "")){
+            createItemPending(element.summery_name,element.description,element.path_name,element.id,element.author,element.grade,element.subject)
+        }
+    });
+    if(!isPending){
+        files.forEach(element => {
+            if((gradeFilters.includes(element.grade) || gradeFilters.length == 0) && (subjectFilters.includes(element.subject)|| subjectFilters.length == 0) && (element.summery_name.includes(nameFilter)|| nameFilter == "")){
+                createItem(element.summery_name,element.description,element.path_name,element.id,element.author,element.grade,element.subject)
+            }
+        });
+    }
+}
+var gradeFilters = [];
+var subjectFilters = [];
+function onSelect(e){
+    e.currentTarget.classList.toggle("selected");
+    var items = document.getElementsByClassName("item");
+    gradeFilters = [];
+    subjectFilters = [];
+    for(var i = 0; i < items.length; i++){
+        if(items[i].classList.contains("selected")){
+            if(items[i].parentElement.id == "gradeCon"){
+                gradeFilters.push(items[i].getAttribute("filter"));
+            }else if(items[i].parentElement.id == "subjectCon"){
+                subjectFilters.push(items[i].getAttribute("filter"));
+            }
+        }
+    }
+    itemsWithFilters(gradeFilters,subjectFilters,"");
+}
+var items = document.getElementsByClassName("item");
+for(var i = 0; i < items.length;i++){
+    items[i].addEventListener("click",onSelect);
+}
+document.getElementById("searchByName").addEventListener("input",function(e){
+    itemsWithFilters(gradeFilters,subjectFilters,e.target.value);
+}) 
 function clear(){
     container.innerHTML = "";
-    files = [];
 }
 var files = [];
 function get(url,callback){
@@ -145,16 +210,32 @@ function get(url,callback){
 
     xhr.send();
 }
+var pending = [];
+function get2(url,callback){
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.setRequestHeader("password", AdminPass);
+
+    xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+        pending = JSON.parse(xhr.responseText);
+        callback()
+    }};
+
+    xhr.send();
+}
 function updateList(){
     clear();
-    get("/pending",function(){
-        files.forEach(element => {
-            createItemPending(element.summery_name,element.description,element.path_name,element.id)
+    get2("/pending",function(){
+        pending.forEach(element => {
+            createItemPending(element.summery_name,element.description,element.path_name,element.id,element.author,element.grade,element.subject)
         });
     })
     get("/files",function(){
         files.forEach(element => {
-            createItem(element.summery_name,element.description,element.path_name,element.id)
+            createItem(element.summery_name,element.description,element.path_name,element.id,element.author,element.grade,element.subject)
         });
     })
 }

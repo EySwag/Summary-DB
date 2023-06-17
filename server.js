@@ -15,15 +15,13 @@ function errorFunction(err){
 const db = new sqlite3.Database('./files.db',sqlite3.OPEN_READWRITE,errorFunction)
 
 //Create files table
-//db.run("CREATE TABLE files(id INTEGER PRIMARY KEY,summery_name,path_name,original_name,author,description,subject)")
+//db.run("CREATE TABLE files(id INTEGER PRIMARY KEY,summery_name,path_name,original_name,author,description,subject,grade)")
 //Create pending table
-//db.run("CREATE TABLE pending(id INTEGER PRIMARY KEY,summery_name,path_name,original_name,author,description,subject)")
+//db.run("CREATE TABLE pending(id INTEGER PRIMARY KEY,summery_name,path_name,original_name,author,description,subject,grade)")
 
-
-
-function addPendingFile(originalname,pathname,summeryName,author,description,subject){
-  var sql = "INSERT INTO pending(summery_name,path_name,original_name,author,description,subject) VALUES (?,?,?,?,?,?)";
-  db.run(sql,[summeryName,pathname,originalname,author,description,subject],errorFunction);
+function addPendingFile(originalname,pathname,summeryName,author,description,subject,grade){
+  var sql = "INSERT INTO pending(summery_name,path_name,original_name,author,description,subject,grade) VALUES (?,?,?,?,?,?,?)";
+  db.run(sql,[summeryName,pathname,originalname,author,description,subject,grade],errorFunction);
 }
 function removePendingFile(id){
   var sql = "SELECT path_name FROM pending WHERE id=?";
@@ -33,12 +31,12 @@ function removePendingFile(id){
 
     fs.unlinkSync(path.join(__dirname,"/pending",row.path_name));
   })
-    
 
 }
-function addFile(originalname,pathname,summeryName,author,description,subject){
-  var sql = "INSERT INTO files(summery_name,path_name,original_name,author,description,subject) VALUES (?,?,?,?,?,?)";
-  db.run(sql,[summeryName,pathname,originalname,author,description,subject],errorFunction);
+function addFile(originalname,pathname,summeryName,author,description,subject,grade){
+
+  var sql = "INSERT INTO files(summery_name,path_name,original_name,author,description,subject,grade) VALUES (?,?,?,?,?,?,?)";
+  db.run(sql,[summeryName,pathname,originalname,author,description,subject,grade],errorFunction);
 }
 function confirmFile(id){
   
@@ -48,8 +46,8 @@ function confirmFile(id){
     var oldPath = path.join(__dirname,"/pending",row.path_name)
     var newPath = path.join(__dirname,"/files",row.path_name)
     fs.renameSync(oldPath, newPath)
-    var sql2 = "INSERT INTO files(summery_name,path_name,original_name,author,description,subject) VALUES (?,?,?,?,?,?)"
-    db.run(sql2,[row.summery_name,row.path_name,row.original_name,row.author,row.description,row.subject],errorFunction);
+    var sql2 = "INSERT INTO files(summery_name,path_name,original_name,author,description,subject,grade) VALUES (?,?,?,?,?,?,?)"
+    db.run(sql2,[row.summery_name,row.path_name,row.original_name,row.author,row.description,row.subject,row.grade],errorFunction);
   })
   sql = "DELETE FROM pending WHERE id=?";
   db.run(sql,[id],errorFunction);
@@ -92,7 +90,7 @@ function fieldExists(field, canBeEmpty){
   return true;
 }
 function validateUpload(req){
-    if(fieldExists(req.author,false) && fieldExists(req.summeryName,false) && fieldExists(req.description,true) &&fieldExists(req.subject,false)){
+    if(fieldExists(req.author,false) && fieldExists(req.summeryName,false) && fieldExists(req.description,true) &&fieldExists(req.subject,false)&&fieldExists(req.grade,false)){
       return true;
     }
     return false;
@@ -131,7 +129,7 @@ app.post('/upload',upload.single('file'),function(req,res){
     db.all(sql,function(err,rows){
       var isDupe = false;
       rows.forEach(element => {
-        if(element.summery_name == req.body.summeryName && element.subject == req.body.subject){
+        if(element.summery_name == req.body.summeryName && element.subject == req.body.subject && row.grade == req.body.grade){
           isDupe = true;
         }
       });
@@ -139,7 +137,7 @@ app.post('/upload',upload.single('file'),function(req,res){
         fs.unlinkSync(path.join(__dirname,"/pending",req.file.filename));
         res.send('duplicate');
       }else{
-        addPendingFile(req.file.originalname,req.file.filename,req.body.summeryName,req.body.author,req.body.description,req.body.subject);
+        addPendingFile(req.file.originalname,req.file.filename,req.body.summeryName,req.body.author,req.body.description,req.body.subject,req.body.grade);
         res.send('upload successful');
       }
     })

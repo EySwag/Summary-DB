@@ -20,25 +20,36 @@
 </div>
 
 <div class="vertical-menu">
-    <input type="text" class="search" placeholder="חפש סיכום..."></input>
-    <h1>לפי מקצוע:</h1>
-    <div class="item"><a>לשון</a></div>
-    <div class="item"><a>מתמטיקה</a></div>
-    <div class="item"><a>אנגלית</a></div>
-    <div class="item"><a>היסטוריה</a></div>
-    <div class="item"><a>לשון</a></div>
-    <div class="item"><a>ספרות</a></div>
-    <div class="item"><a>תנ"ך</a></div>
-    <div class="item"><a>אזרחות</a></div>
-    <div class="item"><a>גאוגרפיה</a></div>
-    <div class="item"><a>הומניסטיקה(אוי ואבוי)</a></div>
-    <div class="item"><a>ביולוגיה</a></div>
-    <div class="item"><a>פיזיקה</a></div>
-    <div class="item"><a>הנדסת תוכנה</a></div>
-    <div class="item"><a>מדעי המחשב</a></div>
-    <div class="item"><a>אומנות</a></div>
-
-    
+    <input id="searchByName" type="text" class="search" placeholder="חפש סיכום..."></input>
+    <h1>סינון:</h1>
+    <h1>לפי שכבה:</h1>
+    <div class="filterContainer" id="gradeCon">
+        <div class="item" filter="0"><a>ז</a></div>
+        <div class="item" filter="1"><a>ח</a></div>
+        <div class="item" filter="2"><a>ט</a></div>
+        <div class="item" filter="3"><a>י</a></div>
+        <div class="item" filter="4"><a>יא</a></div>
+        <div class="item" filter="5"><a>יב</a></div>
+        <div class="item" filter="6"><a>בגרות</a></div>
+    </div>
+    <h1 class="second">לפי מקצוע:</h1>
+    <div class="filterContainer" id="subjectCon">
+        <div class="item" filter="lashon"><a>לשון</a></div>
+        <div class="item" filter="math"><a>מתמטיקה</a></div>
+        <div class="item" filter="english"><a>אנגלית</a></div>
+        <div class="item" filter="history"><a>היסטוריה</a></div>
+        <div class="item" filter="literature"><a>ספרות</a></div>
+        <div class="item" filter="tanakh"><a>תנ"ך</a></div>
+        <div class="item" filter="citizenship"><a>אזרחות</a></div>
+        <div class="item" filter="geography"><a>גאוגרפיה</a></div>
+        <div class="item" filter="chemistry"><a>כימיה</a></div>
+        <div class="item" filter="biology"><a>ביולוגיה</a></div>
+        <div class="item" filter="physics"><a>פיזיקה</a></div>
+        <div class="item" filter="software_engineering"><a>הנדסת תוכנה</a></div>
+        <div class="item" filter="computer_science"><a>מדעי המחשב</a></div>
+        <div class="item" filter="art"><a>אומנות</a></div>
+        <div class="item" filter="humanistics"><a>הומניסטיקה</a></div>
+    </div>
 </div>
 <div class="leftContainer" id="Container">
 </div>
